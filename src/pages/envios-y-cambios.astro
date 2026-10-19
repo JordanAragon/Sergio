@@ -1,0 +1,66 @@
+---
+// Plantilla basada en el Estatuto del Consumidor (Ley 1480 de 2011). Sergio la confirma
+// antes de publicar; no reemplaza la revisión de un abogado.
+import Base from "../layouts/Base.astro";
+import { catalogo } from "../datos/fuente";
+import { pesos } from "../lib/pedido";
+
+const { tienda: t } = await catalogo();
+---
+
+<Base titulo="Envíos, cambios y garantías" descripcion={`Cómo envía ${t.nombre}, cambios de talla, derecho de retracto y garantías.`}>
+  <article class="contenedor texto-legal">
+    <h1>Envíos, cambios y garantías</h1>
+
+    <h2 id="envios">Envíos</h2>
+    <p>
+      {t.envioCiudades ? `Enviamos a ${t.envioCiudades}.` : "Te confirmamos por WhatsApp si llegamos a tu ciudad."}
+      {t.envioTiempo && ` El tiempo de entrega es de ${t.envioTiempo}, contado desde que confirmamos el pago.`}
+    </p>
+    <p>
+      {t.envioCosto !== null ? `El envío cuesta ${pesos(t.envioCosto)}.` : "El costo del envío depende de la ciudad y te lo decimos antes de que pagues."}
+      {t.envioGratisDesde !== null && ` Es gratis en compras desde ${pesos(t.envioGratisDesde)}.`}
+      {t.recogidaLugar && ` También puedes recoger tu pedido en ${t.recogidaLugar}, sin costo.`}
+    </p>
+
+    <h2 id="pedido">Cómo se confirma un pedido</h2>
+    <p>
+      El pedido que envías por WhatsApp es una solicitud. Te respondemos para confirmar que hay unidades, el precio total con el envío y los datos de pago{t.pago ? ` (${t.pago})` : ""}. La compra queda hecha cuando confirmamos el pago.
+    </p>
+
+    <h2 id="cambios">Cambios de talla o color</h2>
+    <p>
+      Si la talla no te queda, puedes pedir el cambio por otra talla o color disponible escribiéndonos por WhatsApp dentro de los [número] días siguientes a la entrega. El producto debe estar sin uso, con sus etiquetas y en su empaque. [Quién paga el envío del cambio.]
+    </p>
+
+    <h2 id="retracto">Derecho de retracto</h2>
+    <p>
+      Como la compra se hace a distancia, tienes derecho a retractarte dentro de los 5 días hábiles siguientes a la entrega del producto (artículo 47 de la Ley 1480 de 2011). Para hacerlo, escríbenos por WhatsApp o al correo {t.correo || "[correo]"} y devuelve el producto en las mismas condiciones en que lo recibiste. Los costos de transporte de la devolución corren por tu cuenta.
+    </p>
+    <p>
+      Te devolvemos el dinero pagado, sin descuentos, en un plazo máximo de 30 días calendario desde que ejerces el derecho. La ley tiene excepciones, como los productos hechos a la medida o personalizados para ti y los de uso personal que no se pueden volver a vender por higiene.
+    </p>
+
+    <h2 id="garantias">Garantías</h2>
+    <p>
+      Todos los productos tienen la garantía legal de calidad, idoneidad y seguridad que fija la Ley 1480 de 2011. Si un producto llega con un defecto o falla por un defecto de fabricación, escríbenos con fotos del problema y lo reparamos, lo cambiamos o te devolvemos el dinero, según lo que establece la ley. [Término de garantía de cada tipo de producto.]
+    </p>
+
+    <h2 id="pqr">Peticiones, quejas y reclamos</h2>
+    <p>
+      Escríbenos por WhatsApp{t.correo ? ` o al correo ${t.correo}` : ""}{t.horario ? `, en horario de ${t.horario}` : ""}. Si no quedas conforme con la respuesta, puedes acudir a la <a href="https://www.sic.gov.co" target="_blank" rel="noopener">Superintendencia de Industria y Comercio</a>.
+    </p>
+
+    <h2 id="vendedor">Quién vende</h2>
+    <p>
+      {[t.vendedorNombre, t.vendedorDocumento && `Documento: ${t.vendedorDocumento}`, t.vendedorCiudad].filter(Boolean).join(" · ")}
+    </p>
+  </article>
+</Base>
+
+<style>
+  h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    padding-top: 28px;
+  }
+</style>

@@ -1,0 +1,27 @@
+---
+import Base from "../layouts/Base.astro";
+import TarjetaProducto from "../components/TarjetaProducto.astro";
+import Filtros from "../components/Filtros.astro";
+import { catalogo, ordenVitrina } from "../datos/fuente";
+
+const cat = await catalogo();
+const nuevos = cat.productos.filter((p) => p.nuevo);
+const lista = ordenVitrina(nuevos.length ? nuevos : cat.productos);
+---
+
+<Base titulo="Lo nuevo" descripcion={`Lo último que llegó a ${cat.tienda.nombre}. Pide por WhatsApp.`} actual="nuevo">
+  <section class="contenedor">
+    <h1>Lo nuevo</h1>
+    <Filtros productos={lista} />
+    <div class="grilla" data-grilla>
+      {lista.map((p, i) => <TarjetaProducto producto={p} prioridad={i < 2} />)}
+    </div>
+  </section>
+</Base>
+
+<style>
+  h1 {
+    font-size: clamp(38px, 6vw, 72px);
+    padding-top: 28px;
+  }
+</style>

@@ -1,0 +1,51 @@
+---
+// Plantilla de política de tratamiento de datos (Ley 1581 de 2012). Sergio la confirma
+// antes de publicar; no reemplaza la revisión de un abogado.
+import Base from "../layouts/Base.astro";
+import { catalogo } from "../datos/fuente";
+
+const { tienda: t } = await catalogo();
+const responsable = [t.vendedorNombre, t.vendedorDocumento, t.vendedorCiudad].filter(Boolean).join(", ");
+---
+
+<Base titulo="Tratamiento de datos personales" descripcion={`Cómo ${t.nombre} usa y protege tus datos personales.`}>
+  <article class="contenedor texto-legal">
+    <h1>Tratamiento de datos personales</h1>
+
+    <h2>Quién es el responsable</h2>
+    <p>{responsable}. Contacto: WhatsApp de la tienda{t.correo ? ` y ${t.correo}` : ""}.</p>
+
+    <h2>Qué datos recogemos</h2>
+    <p>
+      Este sitio no tiene cuentas ni formularios de registro. Cuando haces un pedido, tu nombre, la dirección de entrega y los productos que eliges se envían por WhatsApp y quedan en nuestro registro de pedidos. Tu número de teléfono lo vemos en el chat de WhatsApp.
+    </p>
+    <p>
+      El sitio guarda en tu propio navegador el pedido que estás armando y los datos que escribiste, para que no los pierdas al cambiar de página. Ese dato no sale de tu teléfono o computador hasta que envías el pedido. También medimos visitas de forma anónima, sin cookies, para saber qué productos se miran más.
+    </p>
+
+    <h2>Para qué los usamos</h2>
+    <ul>
+      <li>Confirmar tu pedido, el pago y la entrega.</li>
+      <li>Atender cambios, devoluciones, garantías y reclamos.</li>
+      <li>Llevar nuestras cuentas de ventas.</li>
+      <li>Enviarte novedades de la tienda por WhatsApp, solo si nos autorizas.</li>
+    </ul>
+
+    <h2>Tus derechos</h2>
+    <p>
+      Puedes conocer, actualizar, rectificar y pedir que borremos tus datos, y revocar la autorización que nos diste, escribiéndonos por WhatsApp{t.correo ? ` o a ${t.correo}` : ""}. Respondemos las consultas en máximo 10 días hábiles y los reclamos en máximo 15 días hábiles. También puedes acudir a la <a href="https://www.sic.gov.co" target="_blank" rel="noopener">Superintendencia de Industria y Comercio</a>.
+    </p>
+
+    <h2>Con quién los compartimos</h2>
+    <p>Solo con la transportadora que lleva tu pedido, con los datos necesarios para entregarlo. No vendemos tus datos.</p>
+
+    <p class="suave">Vigente desde [fecha].</p>
+  </article>
+</Base>
+
+<style>
+  h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    padding-top: 28px;
+  }
+</style>

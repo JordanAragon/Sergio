@@ -1,0 +1,115 @@
+---
+import type { Coleccion, Tienda } from "../datos/catalogo";
+
+interface Props {
+  tienda: Tienda;
+  colecciones: Coleccion[];
+}
+const { tienda, colecciones } = Astro.props;
+const vendedor = [tienda.vendedorNombre, tienda.vendedorDocumento, tienda.vendedorCiudad].filter(Boolean).join(" · ");
+---
+
+<footer class="pie">
+  <div class="contenedor rejilla">
+    <div>
+      <div class="marca nombre">{tienda.nombre}</div>
+      {vendedor && <p>{vendedor}</p>}
+      {tienda.horario && <p>Atención por WhatsApp: {tienda.horario}</p>}
+      {tienda.correo && <p>Peticiones, quejas y reclamos: <a href={`mailto:${tienda.correo}`}>{tienda.correo}</a></p>}
+    </div>
+    <nav aria-label="Secciones de la tienda">
+      <ul>
+        {
+          colecciones
+            .filter((c) => c.estado === "visible")
+            .map((c) => (
+              <li>
+                <a href={`/coleccion/${c.handle}`}>{c.nombre}</a>
+              </li>
+            ))
+        }
+        <li><a href="/nuevo">Lo nuevo</a></li>
+        <li><a href="/buscar">Buscar</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Información legal">
+      <ul>
+        <li><a href="/envios-y-cambios">Envíos y cambios</a></li>
+        <li><a href="/envios-y-cambios#retracto">Derecho de retracto</a></li>
+        <li><a href="/envios-y-cambios#garantias">Garantías</a></li>
+        <li><a href="/datos-personales">Datos personales</a></li>
+        <li><a href="https://www.sic.gov.co" target="_blank" rel="noopener">Superintendencia de Industria y Comercio</a></li>
+      </ul>
+    </nav>
+    {
+      (tienda.instagram || tienda.tiktok) && (
+        <nav aria-label="Redes sociales">
+          <ul>
+            {tienda.instagram && (
+              <li>
+                <a href={`https://instagram.com/${tienda.instagram}`} target="_blank" rel="noopener">
+                  Instagram
+                </a>
+              </li>
+            )}
+            {tienda.tiktok && (
+              <li>
+                <a href={`https://www.tiktok.com/@${tienda.tiktok}`} target="_blank" rel="noopener">
+                  TikTok
+                </a>
+              </li>
+            )}
+          </ul>
+        </nav>
+      )
+    }
+  </div>
+</footer>
+
+<style>
+  .pie {
+    margin-top: 56px;
+    padding: 32px 0 112px;
+    background: var(--tinta);
+    color: #cfccc4;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .rejilla {
+    display: grid;
+    gap: 24px;
+  }
+
+  @media (min-width: 768px) {
+    .rejilla {
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+    }
+  }
+
+  .nombre {
+    color: var(--papel);
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  a {
+    color: var(--papel);
+    display: inline-block;
+    padding-block: 3px;
+  }
+
+  a:hover {
+    color: #fff;
+  }
+</style>

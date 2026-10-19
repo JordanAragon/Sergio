@@ -1,0 +1,38 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base titulo="No encontramos esa página" noIndexar>
+  <section class="contenedor vacio">
+    <h1>No encontramos esa página</h1>
+    <p class="suave">Puede que el producto ya no esté en el catálogo.</p>
+    <div class="botones">
+      <a class="boton" href="/">Ir al inicio</a>
+      <a class="boton boton--claro" href="/buscar">Buscar un producto</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .vacio {
+    padding-top: 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  h1 {
+    font-size: clamp(34px, 6vw, 60px);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .botones {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+</style>

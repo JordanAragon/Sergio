@@ -1,0 +1,58 @@
+---
+// Sello de colaboración: «Tienda × Marca». Si la marca aliada tiene logo, se muestra el logo.
+import { srcBase } from "../lib/imagenes";
+
+interface Props {
+  tienda: string;
+  marca: string;
+  logo?: string | null;
+  claro?: boolean;
+}
+const { tienda, marca, logo, claro = true } = Astro.props;
+---
+
+<div class:list={["sello", { claro }]}>
+  <span class="caja marca">{tienda}</span>
+  <span class="por" aria-label="en colaboración con">×</span>
+  {logo ? <img class="logo" src={srcBase(logo, 300)} alt={marca} height="44" /> : <span class="caja punteada">{marca}</span>}
+</div>
+
+<style>
+  .sello {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .caja {
+    min-height: 44px;
+    padding: 0 14px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid currentColor;
+    font-size: 13px;
+  }
+
+  .claro .caja {
+    border-color: rgb(243 242 239 / 0.6);
+  }
+
+  .punteada {
+    border-style: dashed;
+    font-weight: 600;
+  }
+
+  .por {
+    font-size: 26px;
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  .logo {
+    height: 44px;
+    width: auto;
+    max-width: 160px;
+    object-fit: contain;
+  }
+</style>

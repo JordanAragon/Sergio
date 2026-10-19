@@ -1,0 +1,80 @@
+---
+import Base from "../layouts/Base.astro";
+import TarjetaProducto from "../components/TarjetaProducto.astro";
+import { catalogo, ordenVitrina } from "../datos/fuente";
+
+const cat = await catalogo();
+const lista = ordenVitrina(cat.productos);
+---
+
+<Base titulo="Buscar" descripcion={`Busca en el catálogo de ${cat.tienda.nombre}.`} noIndexar>
+  <section class="contenedor">
+    <h1>Buscar</h1>
+    <form class="buscador" role="search" action="/buscar" method="get" data-buscador>
+      <label class="solo-lector" for="q">Buscar productos</label>
+      <input id="q" name="q" type="search" placeholder="Tacón, camiseta, negro, 38…" autocomplete="off" enterkeyhint="search" />
+    </form>
+    <p class="suave" aria-live="polite" data-resultado>{lista.length} productos</p>
+    <div class="grilla" data-grilla>
+      {lista.map((p) => <TarjetaProducto producto={p} />)}
+    </div>
+  </section>
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("[data-buscador]")!;
+  const input = form.querySelector<HTMLInputElement>("input")!;
+  const resultado = document.querySelector<HTMLElement>("[data-resultado]")!;
+  const tarjetas = [...document.querySelectorAll<HTMLElement>("[data-tarjeta]")];
+  const normal = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const textos = tarjetas.map((t) => normal(`${t.dataset.texto ?? ""} ${(t.dataset.tallas ?? "").replace(/\|/g, " ")}`));
+
+  const buscar = () => {
+    const palabras = normal(input.value).split(/\s+/).filter(Boolean);
+    let n = 0;
+    tarjetas.forEach((t, i) => {
+      const ok = palabras.every((p) => textos[i].includes(p));
+      t.hidden = !ok;
+      if (ok) n++;
+    });
+    resultado.textContent = palabras.length ? (n ? `${n} ${n === 1 ? "resultado" : "resultados"} para «${input.value.trim()}»` : `Nada para «${input.value.trim()}». Prueba con otra palabra o escríbenos por WhatsApp.`) : `${tarjetas.length} productos`;
+    const url = new URL(location.href);
+    if (input.value.trim()) url.searchParams.set("q", input.value.trim());
+    else url.searchParams.delete("q");
+    history.replaceState(null, "", url);
+  };
+
+  input.value = new URLSearchParams(location.search).get("q") ?? "";
+  input.addEventListener("input", buscar);
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    buscar();
+    input.blur();
+  });
+  buscar();
+  if (!input.value) input.focus();
+</script>
+
+<style>
+  h1 {
+    font-size: clamp(38px, 6vw, 72px);
+    padding-top: 28px;
+    margin-bottom: 16px;
+  }
+
+  .buscador input {
+    width: 100%;
+    max-width: 640px;
+    min-height: 56px;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 0 16px;
+    font-size: 18px;
+    background: var(--superficie);
+  }
+
+  p {
+    margin: 14px 0 18px;
+    font-size: 14px;
+  }
+</style>

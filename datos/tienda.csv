@@ -1,0 +1,18 @@
+Clave,Valor,Para qué sirve
+nombre,[Nombre],"Nombre de la tienda. Sale en el encabezado, en WhatsApp y en la vista previa de los enlaces."
+lema,"Calzado, camisetas y más. Cada sección con una marca aliada.",Frase grande del inicio.
+descripcion,Catálogo de calzado de dama y camisetas con diseño. Pide por WhatsApp.,Texto que ve Google y la vista previa al compartir el enlace.
+whatsapp,573000000000,"Número de WhatsApp Business de pedidos: 57 + el celular, sin espacios ni signos."
+envio_ciudades,[ciudades],A dónde envías. Ejemplo: Popayán y todo Colombia.
+envio_costo,,"Costo del envío en pesos, solo números. Vacío = se confirma por WhatsApp."
+envio_gratis_desde,,Desde qué valor de compra el envío es gratis. Vacío = no aplica.
+envio_tiempo,[días de entrega],Cuánto tarda el envío. Ejemplo: 1 a 3 días hábiles.
+recogida_lugar,[lugar],Dónde se puede recoger. Vacío = sin recogida.
+vendedor_nombre,[Razón social o nombre],Quién vende (lo pide la ley).
+vendedor_documento,[NIT o cédula],NIT o cédula del vendedor.
+vendedor_ciudad,[Ciudad],Ciudad del vendedor.
+correo,[correo],"Correo para peticiones, quejas y reclamos."
+instagram,,Usuario de Instagram sin @. Vacío = no se muestra.
+tiktok,,Usuario de TikTok sin @. Vacío = no se muestra.
+horario,[horario de atención],Cuándo respondes por WhatsApp.
+pago,[medios de pago],"Cómo te pagan. Ejemplo: Nequi, Bancolombia o contraentrega."

@@ -1,0 +1,46 @@
+{
+  "name": "tienda-sergio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --port 4321",
+    "build": "astro build",
+    "preview": "astro preview --port 4321",
+    "check": "astro check",
+    "test": "vitest run",
+    "verificar": "node scripts/verificar.mjs",
+    "exportar:shopify": "node scripts/exportar-shopify.mjs"
+  },
+  "dependencies": {
+    "@astrojs/preact": "6.0.5",
+    "@astrojs/sitemap": "3.7.4",
+    "@fontsource-variable/archivo": "5.2.8",
+    "@nanostores/preact": "1.1.0",
+    "astro": "7.3.5",
+    "nanostores": "1.5.4",
+    "papaparse": "5.5.3",
+    "preact": "10.29.8"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.8",
+    "@fontsource/archivo": "5.2.8",
+    "@resvg/resvg-js": "2.6.2",
+    "@types/node": "22.18.0",
+    "@types/papaparse": "5.3.16",
+    "qrcode": "1.5.4",
+    "@types/qrcode": "1.5.5",
+    "satori": "0.18.3",
+    "typescript": "5.9.3",
+    "vitest": "4.0.8"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
