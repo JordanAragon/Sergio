@@ -1,0 +1,85 @@
+---
+// Código QR de la tienda para imprimir (mostrador, empaques, tarjetas).
+import QRCode from "qrcode";
+import Base from "../layouts/Base.astro";
+import { catalogo } from "../datos/fuente";
+
+const { tienda } = await catalogo();
+const url = (Astro.site ?? new URL("http://localhost:4321")).href.replace(/\/$/, "");
+const qr = await QRCode.toString(url, { type: "svg", margin: 0, errorCorrectionLevel: "M", color: { dark: "#111110", light: "#ffffff" } });
+const visible = url.replace(/^https?:\/\//, "");
+---
+
+<Base titulo="Código QR" noIndexar>
+  <section class="contenedor hoja">
+    <div class="tarjeta">
+      <div class="marca">{tienda.nombre}</div>
+      <div class="qr" set:html={qr} />
+      <p class="url">{visible}</p>
+      <p class="suave">Escanea, elige y pide por WhatsApp.</p>
+    </div>
+    <p class="suave no-imprimir">Imprime esta página (Ctrl + P o Compartir › Imprimir) o descárgala como PDF. El QR abre {visible}.</p>
+  </section>
+</Base>
+
+<style>
+  .hoja {
+    padding-top: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .tarjeta {
+    width: min(100%, 420px);
+    background: #fff;
+    padding: 36px 32px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .marca {
+    font-size: 22px;
+  }
+
+  .qr {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .qr :global(svg) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .url {
+    margin: 0;
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  @media print {
+    :global(.franja),
+    :global(.cabecera),
+    :global(.pie),
+    :global(.flotante),
+    :global(.aviso-ejemplo),
+    .no-imprimir {
+      display: none !important;
+    }
+
+    :global(body) {
+      background: #fff;
+    }
+  }
+</style>

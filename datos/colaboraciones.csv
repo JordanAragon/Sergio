@@ -1,0 +1,4 @@
+Handle,Nombre,Subtitulo,Marca,Color,Logo,Foto,Descripcion,Guia de tallas,Orden,Estado
+calzado,Calzado de dama,"Tacones, sandalias y botas",[Marca de calzado],#7A1C2C,,,[Una línea sobre la marca aliada: quiénes son y por qué están aquí.],35=[cm]; 36=[cm]; 37=[cm]; 38=[cm]; 39=[cm]; 40=[cm]; 41=[cm],1,visible
+camisetas,Camisetas con diseño,Diseños propios en tallas S a XL,[Marca de ropa],#1E3FBF,,,[Una línea sobre la marca aliada: quiénes son y por qué están aquí.],S=[cm de pecho]; M=[cm de pecho]; L=[cm de pecho]; XL=[cm de pecho],2,visible
+belleza,Belleza,Maquillaje y cuidado,[Marca de belleza],#2F3A2A,,,[Una línea sobre la marca aliada.],,3,pronto

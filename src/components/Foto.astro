@@ -1,0 +1,26 @@
+---
+import { srcBase, srcset } from "../lib/imagenes";
+
+interface Props {
+  src: string | null | undefined;
+  alt: string;
+  /** Texto del marcador cuando todavía no hay foto. */
+  marcador?: string;
+  sizes?: string;
+  ancho?: number;
+  prioridad?: boolean;
+  class?: string;
+  [k: `data-${string}`]: string | undefined;
+}
+const { src, alt, marcador = "Foto", sizes = "(min-width: 1100px) 25vw, (min-width: 768px) 33vw, 50vw", ancho = 800, prioridad = false, class: clase, ...resto } = Astro.props;
+---
+
+{
+  src ? (
+    <img class={clase} src={srcBase(src, ancho)} srcset={srcset(src)} sizes={srcset(src) ? sizes : undefined} alt={alt} width="800" height="1000" loading={prioridad ? "eager" : "lazy"} fetchpriority={prioridad ? "high" : undefined} decoding="async" {...resto} />
+  ) : (
+    <span class:list={["sin-foto", clase]} role="img" aria-label={alt} {...resto}>
+      {marcador}
+    </span>
+  )
+}

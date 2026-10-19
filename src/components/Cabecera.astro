@@ -1,0 +1,226 @@
+---
+import type { Coleccion, Tienda } from "../datos/catalogo";
+import Icono from "./Icono.astro";
+import BotonPedido from "../islas/BotonPedido";
+
+interface Props {
+  tienda: Tienda;
+  colecciones: Coleccion[];
+  actual?: string;
+}
+const { tienda, colecciones, actual } = Astro.props;
+const visibles = colecciones.filter((c) => c.estado === "visible");
+const enlaces = [...visibles.map((c) => ({ href: `/coleccion/${c.handle}`, texto: c.nombre, id: c.handle })), { href: "/nuevo", texto: "Lo nuevo", id: "nuevo" }];
+const franja = [tienda.envioCiudades && `Envíos a ${tienda.envioCiudades}`, "Pedidos por WhatsApp"].filter(Boolean).join(" · ");
+---
+
+<div class="franja">{franja}</div>
+<header class="cabecera">
+  <div class="contenedor fila">
+    <button class="icono-boton solo-movil" type="button" aria-label="Menú" aria-haspopup="dialog" data-abrir-menu>
+      <Icono nombre="menu" />
+    </button>
+    <a class="marca nombre" href="/">{tienda.nombre}</a>
+    <nav class="nav-escritorio" aria-label="Secciones">
+      {
+        enlaces.map((e) => (
+          <a href={e.href} aria-current={actual === e.id ? "page" : undefined}>
+            {e.texto}
+          </a>
+        ))
+      }
+    </nav>
+    <div class="acciones">
+      <a class="icono-boton" href="/buscar" aria-label="Buscar">
+        <Icono nombre="buscar" />
+      </a>
+      <BotonPedido client:load />
+    </div>
+  </div>
+</header>
+
+<dialog class="menu" aria-label="Menú" data-menu>
+  <div class="menu-cabeza">
+    <span class="marca">{tienda.nombre}</span>
+    <button class="icono-boton" type="button" aria-label="Cerrar menú" data-cerrar-menu>
+      <Icono nombre="cerrar" />
+    </button>
+  </div>
+  <nav aria-label="Secciones">
+    <ul>
+      {
+        enlaces.map((e) => (
+          <li>
+            <a href={e.href} aria-current={actual === e.id ? "page" : undefined}>
+              {e.texto}
+            </a>
+          </li>
+        ))
+      }
+      <li><a href="/buscar">Buscar</a></li>
+    </ul>
+  </nav>
+  <div class="menu-pie">
+    <a href="/envios-y-cambios">Envíos y cambios</a>
+    {tienda.instagram && <a href={`https://instagram.com/${tienda.instagram}`} target="_blank" rel="noopener">Instagram</a>}
+  </div>
+</dialog>
+
+<script>
+  const menu = document.querySelector<HTMLDialogElement>("[data-menu]");
+  document.querySelector("[data-abrir-menu]")?.addEventListener("click", () => menu?.showModal());
+  document.querySelector("[data-cerrar-menu]")?.addEventListener("click", () => menu?.close());
+  menu?.addEventListener("click", (e) => {
+    if (e.target === menu) menu.close();
+  });
+</script>
+
+<style>
+  .franja {
+    background: var(--tinta);
+    color: var(--papel);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-align: center;
+    padding: 9px var(--margen);
+  }
+
+  .cabecera {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--papel) 94%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .fila {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    min-height: 64px;
+  }
+
+  .nombre {
+    justify-self: center;
+    font-size: 17px;
+    text-decoration: none;
+    text-align: center;
+  }
+
+  .nav-escritorio {
+    display: none;
+  }
+
+  .acciones {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  @media (min-width: 900px) {
+    .solo-movil {
+      display: none;
+    }
+
+    .fila {
+      grid-template-columns: auto 1fr auto;
+      gap: 32px;
+      min-height: 72px;
+    }
+
+    .nombre {
+      justify-self: start;
+      font-size: 19px;
+    }
+
+    .nav-escritorio {
+      display: flex;
+      gap: 28px;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .nav-escritorio a {
+      text-decoration: none;
+      padding-block: 6px;
+      border-bottom: 2px solid transparent;
+    }
+
+    .nav-escritorio a[aria-current="page"] {
+      border-bottom-color: var(--tinta);
+    }
+  }
+
+  .menu {
+    margin: 0;
+    width: min(88vw, 360px);
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    padding: 0;
+    border: 0;
+    background: var(--papel);
+    color: var(--tinta);
+  }
+
+  .menu::backdrop {
+    background: rgb(17 17 16 / 0.45);
+  }
+
+  .menu[open] {
+    display: flex;
+    flex-direction: column;
+    animation: entrar 0.2s ease-out;
+  }
+
+  @keyframes entrar {
+    from {
+      transform: translateX(-24px);
+      opacity: 0;
+    }
+  }
+
+  .menu-cabeza {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 8px 10px var(--margen);
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 12px 0;
+  }
+
+  .menu li a {
+    display: block;
+    padding: 14px var(--margen);
+    font-size: 24px;
+    font-weight: 800;
+    font-stretch: 112%;
+    text-decoration: none;
+  }
+
+  .menu li a[aria-current="page"] {
+    text-decoration: underline;
+    text-underline-offset: 6px;
+  }
+
+  .menu-pie {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 20px var(--margen) 32px;
+    font-size: 15px;
+  }
+
+  .menu-pie a {
+    padding-block: 8px;
+  }
+</style>

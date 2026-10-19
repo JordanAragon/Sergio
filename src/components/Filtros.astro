@@ -1,0 +1,268 @@
+---
+// Filtros de una lista de tarjetas: tipo (chips), talla, color y orden. Sin framework:
+// las tarjetas ya están en el HTML y el script solo las oculta u ordena.
+import { ordenarTallas, type Producto } from "../datos/catalogo";
+import Icono from "./Icono.astro";
+
+interface Props {
+  productos: Producto[];
+  etiquetaTipos?: string;
+}
+const { productos, etiquetaTipos = "Tipos" } = Astro.props;
+const tipos = [...new Set(productos.map((p) => p.tipo).filter(Boolean))];
+const tallas = ordenarTallas([...new Set(productos.flatMap((p) => p.tallas))]);
+const colores = [...new Set(productos.flatMap((p) => p.colores))].sort((a, b) => a.localeCompare(b, "es"));
+---
+
+<div class="filtros" data-filtros>
+  {
+    tipos.length > 1 && (
+      <div class="fila-chips" role="group" aria-label={etiquetaTipos}>
+        <button type="button" class="chip" aria-pressed="true" data-tipo="">
+          Todo
+        </button>
+        {tipos.map((t) => (
+          <button type="button" class="chip" aria-pressed="false" data-tipo={t}>
+            {t}
+          </button>
+        ))}
+      </div>
+    )
+  }
+  <div class="barra">
+    <span class="suave" aria-live="polite" data-cuenta>{productos.length} productos</span>
+    <button type="button" class="chip pequeno" aria-expanded="false" aria-controls="panel-filtros" data-abrir>
+      <Icono nombre="filtro" tam={18} /> Talla · Color · Orden <span class="contador" data-contador hidden></span>
+    </button>
+  </div>
+  <div class="panel" id="panel-filtros" hidden data-panel>
+    {
+      tallas.length > 0 && (
+        <fieldset>
+          <legend>Talla</legend>
+          <div class="opciones">
+            {tallas.map((t) => (
+              <button type="button" class="chip cuadrado" aria-pressed="false" data-talla={t}>
+                {t}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      )
+    }
+    {
+      colores.length > 1 && (
+        <fieldset>
+          <legend>Color</legend>
+          <div class="opciones">
+            {colores.map((c) => (
+              <button type="button" class="chip" aria-pressed="false" data-color={c}>
+                {c}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      )
+    }
+    <label class="orden">
+      Ordenar
+      <select data-orden>
+        <option value="">Recomendados</option>
+        <option value="asc">Menor precio</option>
+        <option value="desc">Mayor precio</option>
+      </select>
+    </label>
+    <button type="button" class="enlace" data-limpiar>Quitar filtros</button>
+  </div>
+</div>
+<p class="vacio" hidden data-vacio>
+  No hay productos con esos filtros. <button type="button" class="enlace" data-limpiar>Quitar filtros</button>
+</p>
+
+<script>
+  for (const raiz of document.querySelectorAll<HTMLElement>("[data-filtros]")) {
+    const grilla = raiz.parentElement?.querySelector<HTMLElement>("[data-grilla]");
+    if (!grilla) continue;
+    const tarjetas = [...grilla.querySelectorAll<HTMLElement>("[data-tarjeta]")];
+    const cuenta = raiz.querySelector<HTMLElement>("[data-cuenta]")!;
+    const contador = raiz.querySelector<HTMLElement>("[data-contador]")!;
+    const panel = raiz.querySelector<HTMLElement>("[data-panel]")!;
+    const abrir = raiz.querySelector<HTMLButtonElement>("[data-abrir]")!;
+    const orden = raiz.querySelector<HTMLSelectElement>("[data-orden]")!;
+    const vacio = raiz.parentElement!.querySelector<HTMLElement>("[data-vacio]")!;
+    const estado = { tipo: "", tallas: new Set<string>(), colores: new Set<string>() };
+
+    const aplicar = () => {
+      let visibles = 0;
+      for (const t of tarjetas) {
+        const tallas = (t.dataset.tallas ?? "").split("|");
+        const colores = (t.dataset.colores ?? "").split("|");
+        const ok =
+          (!estado.tipo || t.dataset.tipo === estado.tipo) &&
+          (estado.tallas.size === 0 || tallas.some((x) => estado.tallas.has(x))) &&
+          (estado.colores.size === 0 || colores.some((x) => estado.colores.has(x)));
+        t.hidden = !ok;
+        if (ok) visibles++;
+      }
+      const o = orden.value;
+      tarjetas.forEach((t, i) => {
+        const precio = Number(t.dataset.precio);
+        const agotado = Number(t.dataset.orden) * 1e9;
+        t.style.order = o === "asc" ? String(agotado + precio) : o === "desc" ? String(agotado + 1e8 - precio) : String(i);
+      });
+      cuenta.textContent = `${visibles} ${visibles === 1 ? "producto" : "productos"}`;
+      const n = estado.tallas.size + estado.colores.size + (o ? 1 : 0);
+      contador.hidden = n === 0;
+      contador.textContent = String(n);
+      vacio.hidden = visibles > 0;
+    };
+
+    raiz.querySelectorAll<HTMLButtonElement>("[data-tipo]").forEach((b) =>
+      b.addEventListener("click", () => {
+        estado.tipo = b.dataset.tipo ?? "";
+        raiz.querySelectorAll("[data-tipo]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        aplicar();
+      }),
+    );
+    const alternar = (sel: string, set: Set<string>, clave: "talla" | "color") =>
+      raiz.querySelectorAll<HTMLButtonElement>(sel).forEach((b) =>
+        b.addEventListener("click", () => {
+          const v = b.dataset[clave]!;
+          set.has(v) ? set.delete(v) : set.add(v);
+          b.setAttribute("aria-pressed", String(set.has(v)));
+          aplicar();
+        }),
+      );
+    alternar("[data-talla]", estado.tallas, "talla");
+    alternar("[data-color]", estado.colores, "color");
+    orden.addEventListener("change", aplicar);
+    abrir.addEventListener("click", () => {
+      panel.hidden = !panel.hidden;
+      abrir.setAttribute("aria-expanded", String(!panel.hidden));
+    });
+    raiz.parentElement!.querySelectorAll("[data-limpiar]").forEach((b) =>
+      b.addEventListener("click", () => {
+        estado.tipo = "";
+        estado.tallas.clear();
+        estado.colores.clear();
+        orden.value = "";
+        raiz.querySelectorAll("[data-talla],[data-color]").forEach((x) => x.setAttribute("aria-pressed", "false"));
+        raiz.querySelectorAll<HTMLElement>("[data-tipo]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.tipo === "")));
+        aplicar();
+      }),
+    );
+  }
+</script>
+
+<style>
+  .filtros {
+    position: sticky;
+    top: 64px;
+    z-index: 10;
+    background: var(--papel);
+    padding: 16px 0 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  @media (min-width: 900px) {
+    .filtros {
+      top: 72px;
+    }
+  }
+
+  .barra {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    gap: 12px;
+  }
+
+  .pequeno {
+    gap: 8px;
+    font-size: 13px;
+    padding: 0 14px;
+  }
+
+  .contador {
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: var(--tinta);
+    color: var(--papel);
+    font-size: 11px;
+    display: inline-grid;
+    place-items: center;
+  }
+
+  .contador[hidden] {
+    display: none;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    background: var(--superficie);
+    border-radius: 4px;
+    max-height: 60vh;
+    overflow: auto;
+  }
+
+  .panel[hidden] {
+    display: none;
+  }
+
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  legend {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .cuadrado {
+    min-width: 52px;
+    justify-content: center;
+    border-radius: var(--radio);
+  }
+
+  .orden {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .orden select {
+    min-height: 44px;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    background: var(--papel);
+    padding: 0 10px;
+    font-weight: 400;
+    max-width: 260px;
+  }
+
+  .vacio {
+    padding: 24px 0;
+  }
+
+  .vacio[hidden] {
+    display: none;
+  }
+</style>

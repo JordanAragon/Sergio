@@ -1,0 +1,146 @@
+---
+import type { Producto } from "../datos/catalogo";
+import { rangoTallas } from "../datos/catalogo";
+import { pesos } from "../lib/pedido";
+import Foto from "./Foto.astro";
+
+interface Props {
+  producto: Producto;
+  prioridad?: boolean;
+}
+const { producto: p, prioridad = false } = Astro.props;
+const etiqueta = p.agotado ? "Agotado" : p.precioAntes ? "Oferta" : p.unidades !== null && p.unidades <= 3 ? "Últimas unidades" : p.nuevo ? "Nuevo" : "";
+const colores = p.colores.length > 1 ? `${p.colores[0]} · +${p.colores.length - 1} ${p.colores.length === 2 ? "color" : "colores"}` : (p.colores[0] ?? "");
+const tallas = rangoTallas(p.tallas);
+const tallasDisponibles = [...new Set(p.variantes.filter((v) => v.unidades === null || v.unidades > 0).map((v) => v.talla))];
+const precioVaria = new Set(p.variantes.map((v) => v.precio)).size > 1;
+---
+
+<a
+  class:list={["tarjeta", { agotado: p.agotado }]}
+  href={`/producto/${p.handle}`}
+  data-tarjeta
+  data-tipo={p.tipo}
+  data-tallas={tallasDisponibles.join("|")}
+  data-colores={p.colores.join("|")}
+  data-precio={p.precio}
+  data-orden={p.agotado ? 1 : 0}
+  data-texto={[p.titulo, p.tipo, p.marca, p.colores.join(" "), p.etiquetas.join(" ")].join(" ").toLowerCase()}
+>
+  <div class="foto">
+    <Foto src={p.imagenes[0]} alt={`${p.titulo}${p.colores[0] ? ` en ${p.colores[0].toLowerCase()}` : ""}`} marcador={`Foto: ${p.titulo.toLowerCase()}`} prioridad={prioridad} />
+    {p.imagenes[1] && <Foto class="segunda" src={p.imagenes[1]} alt="" />}
+    {etiqueta && <span class="etiqueta">{etiqueta}</span>}
+  </div>
+  <div class="nombre">{p.titulo}</div>
+  {colores && <div class="detalle">{colores}</div>}
+  {tallas && <div class="detalle chico">Tallas {tallas}</div>}
+  <div class="precio">
+    {precioVaria && <span class="desde">Desde</span>}
+    {pesos(p.precio)}
+    {p.precioAntes && <s>{pesos(p.precioAntes)}</s>}
+  </div>
+</a>
+
+<style>
+  .tarjeta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-decoration: none;
+    color: var(--tinta);
+  }
+
+  .tarjeta:hover {
+    color: var(--tinta);
+  }
+
+  .tarjeta[hidden] {
+    display: none;
+  }
+
+  .foto {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radio);
+    overflow: hidden;
+    background: var(--foto);
+    margin-bottom: 4px;
+  }
+
+  .foto :global(img),
+  .foto :global(.sin-foto) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.25s ease, transform 0.4s ease;
+  }
+
+  .foto :global(.segunda) {
+    opacity: 0;
+  }
+
+  @media (hover: hover) {
+    .tarjeta:hover .foto :global(.segunda) {
+      opacity: 1;
+    }
+
+    .tarjeta:hover .foto :global(img:only-of-type) {
+      transform: scale(1.03);
+    }
+  }
+
+  .agotado .foto :global(img),
+  .agotado .foto :global(.sin-foto) {
+    opacity: 0.55;
+  }
+
+  .etiqueta {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--papel);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 2px;
+  }
+
+  .nombre {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .detalle {
+    font-size: 13px;
+    color: var(--gris);
+  }
+
+  .chico {
+    font-size: 12px;
+  }
+
+  .precio {
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+
+  .desde {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--gris);
+  }
+
+  s {
+    font-weight: 400;
+    color: var(--gris);
+    font-size: 13px;
+  }
+</style>

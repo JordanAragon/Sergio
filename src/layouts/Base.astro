@@ -1,0 +1,138 @@
+---
+import "../styles/global.css";
+import "../styles/islas.css";
+import { catalogo } from "../datos/fuente";
+import Cabecera from "../components/Cabecera.astro";
+import Pie from "../components/Pie.astro";
+import Icono from "../components/Icono.astro";
+import CajonPedido from "../islas/CajonPedido";
+import { enlaceWhatsApp } from "../lib/pedido";
+
+interface Props {
+  /** Título de la página; vacío en el inicio. */
+  titulo?: string;
+  descripcion?: string;
+  /** Ruta de la imagen Open Graph (1200×630) o URL absoluta. */
+  imagen?: string;
+  imagenAlt?: string;
+  tipo?: "website" | "product";
+  acento?: string;
+  noIndexar?: boolean;
+  /** Colección activa en la navegación. */
+  actual?: string;
+}
+
+const cat = await catalogo();
+const { tienda } = cat;
+const { titulo, descripcion = tienda.descripcion || tienda.lema, imagen = "/og/inicio.png", imagenAlt, tipo = "website", acento, noIndexar = false, actual } = Astro.props;
+
+const site = Astro.site ?? new URL("http://localhost:4321");
+const url = new URL(Astro.url.pathname, site).href;
+const imagenUrl = new URL(imagen, site).href;
+const tituloCompleto = titulo ? `${titulo} · ${tienda.nombre}` : `${tienda.nombre} · ${tienda.lema || "Catálogo"}`;
+const alt = imagenAlt ?? `${tienda.nombre}: ${tienda.lema}`;
+const generico = enlaceWhatsApp(tienda.whatsapp, `Hola, tengo una pregunta sobre la tienda.`);
+const analytics = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
+const tiendaCajon = {
+  nombre: tienda.nombre,
+  whatsapp: tienda.whatsapp,
+  envioCosto: tienda.envioCosto,
+  envioGratisDesde: tienda.envioGratisDesde,
+  recogidaLugar: tienda.recogidaLugar,
+  envioCiudades: tienda.envioCiudades,
+  pago: tienda.pago,
+};
+const registro = import.meta.env.PUBLIC_REGISTRO_PEDIDOS_URL ?? "";
+---
+
+<!doctype html>
+<html lang="es-CO">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descripcion} />
+    <link rel="canonical" href={url} />
+    {noIndexar && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#f3f2ef" />
+
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content={tipo === "product" ? "product" : "website"} />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content={tienda.nombre} />
+    <meta property="og:url" content={url} />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:image" content={imagenUrl} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={alt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={tituloCompleto} />
+    <meta name="twitter:description" content={descripcion} />
+    <meta name="twitter:image" content={imagenUrl} />
+    <meta name="twitter:image:alt" content={alt} />
+    <slot name="head" />
+    {analytics && <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: analytics })} />}
+  </head>
+  <body style={acento ? `--acento: ${acento}` : undefined}>
+    <a class="saltar" href="#contenido">Saltar al contenido</a>
+    {
+      cat.ejemplo && (
+        <div class="aviso-ejemplo" role="note">
+          Vista de prueba: los productos, precios y marcas son de ejemplo.
+        </div>
+      )
+    }
+    <Cabecera tienda={tienda} colecciones={cat.colecciones} actual={actual} />
+    <main id="contenido">
+      <slot />
+    </main>
+    <Pie tienda={tienda} colecciones={cat.colecciones} />
+    <a class="flotante" href={generico} target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
+      <Icono nombre="whatsapp" tam={26} grosor={1.7} />
+    </a>
+    <CajonPedido client:idle tienda={tiendaCajon} registro={registro} />
+  </body>
+</html>
+
+<style>
+  .aviso-ejemplo {
+    background: #fff4c7;
+    color: #4a3b00;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    padding: 8px var(--margen);
+  }
+
+  .flotante {
+    position: fixed;
+    right: 16px;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: 30;
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background: var(--whatsapp);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    box-shadow: var(--sombra);
+  }
+
+  .flotante:hover {
+    color: #fff;
+    background: #0f7a40;
+  }
+
+  :global(body.con-barra) .flotante {
+    bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+</style>
